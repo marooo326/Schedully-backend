@@ -1,10 +1,10 @@
-package schedully.schedully.schedule.date;
+package schedully.schedully.date;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import schedully.schedully.schedule.member.Member;
+import schedully.schedully.member.Member;
 import schedully.schedully.schedule.Schedule;
 
 import java.time.LocalDate;

@@ -1,4 +1,4 @@
-package schedully.schedully.schedule.member;
+package schedully.schedully.member;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

@@ -1,4 +1,4 @@
-package schedully.schedully.schedule.date;
+package schedully.schedully.date;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 

@@ -2,7 +2,7 @@ package schedully.schedully.schedule;
 
 import jakarta.persistence.*;
 import lombok.*;
-import schedully.schedully.schedule.member.Member;
+import schedully.schedully.member.Member;
 
 import java.time.LocalDate;
 import java.util.List;

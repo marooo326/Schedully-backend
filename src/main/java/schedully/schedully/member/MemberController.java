@@ -1,4 +1,4 @@
-package schedully.schedully.schedule.member;
+package schedully.schedully.member;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

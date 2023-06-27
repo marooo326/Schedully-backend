@@ -1,9 +1,9 @@
-package schedully.schedully.schedule.member;
+package schedully.schedully.member;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
-import schedully.schedully.schedule.date.Date;
+import schedully.schedully.date.Date;
 import schedully.schedully.schedule.Schedule;
 
 import java.util.ArrayList;

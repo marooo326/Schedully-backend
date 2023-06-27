@@ -5,8 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import schedully.schedully.schedule.member.Member;
-import schedully.schedully.schedule.member.MemberDTO;
+import schedully.schedully.member.Member;
+import schedully.schedully.member.MemberDTO;
 
 import java.util.List;
 import java.util.Optional;

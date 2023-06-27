@@ -2,7 +2,7 @@ package schedully.schedully.schedule;
 
 import lombok.*;
 import org.jetbrains.annotations.NotNull;
-import schedully.schedully.schedule.member.MemberDTO;
+import schedully.schedully.member.MemberDTO;
 
 import java.time.LocalDate;
 

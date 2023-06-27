@@ -4,10 +4,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
-import schedully.schedully.schedule.member.Member;
-import schedully.schedully.schedule.member.MemberDTO;
-import schedully.schedully.schedule.member.MemberRepository;
-import schedully.schedully.schedule.member.Role;
+import schedully.schedully.member.Member;
+import schedully.schedully.member.MemberDTO;
+import schedully.schedully.member.MemberRepository;
+import schedully.schedully.member.Role;
 
 import java.util.ArrayList;
 import java.util.List;
