@@ -10,6 +10,7 @@ import java.time.LocalDate;
 @Setter
 @Builder
 @AllArgsConstructor
+@NoArgsConstructor(force = true)
 public class ScheduleDTO {
 
     @NotNull

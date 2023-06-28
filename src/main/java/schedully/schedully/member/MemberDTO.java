@@ -7,6 +7,7 @@ import org.jetbrains.annotations.NotNull;
 @Setter
 @Builder
 @AllArgsConstructor
+@NoArgsConstructor(force = true)
 public class MemberDTO {
     @NotNull
     private String name;

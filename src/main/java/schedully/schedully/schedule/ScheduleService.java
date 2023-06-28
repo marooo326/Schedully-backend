@@ -3,6 +3,8 @@ package schedully.schedully.schedule;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import schedully.schedully.member.Member;
 import schedully.schedully.member.MemberDTO;
@@ -19,31 +21,24 @@ import java.util.Optional;
 public class ScheduleService {
     private final ScheduleRepository scheduleRepository;
     private final MemberRepository memberRepository;
+    private final PasswordEncoder passwordEncoder;
 
     public Schedule createSchedule(@NotNull ScheduleDTO scheduleDTO) {
         MemberDTO memberDTO = scheduleDTO.getAuthor();
 
         Schedule schedule = Schedule.builder()
                 .title(scheduleDTO.getTitle())
-                .password(scheduleDTO.getPassword())
+                .password(passwordEncoder.encode(scheduleDTO.getPassword()))
                 .content(scheduleDTO.getContent())
                 .startDate(scheduleDTO.getStartDate())
                 .endDate(scheduleDTO.getEndDate())
                 .members(new ArrayList<>())
                 .build();
 
-        Member author = Member.builder()
-                .name(memberDTO.getName())
-                .password(memberDTO.getPassword())
-                .role(Role.ADMIN)
-                .availableDates(new ArrayList<>())
-                .build();
+        schedule = scheduleRepository.save(schedule);
 
-        author.updateSchedule(schedule);
-        memberRepository.save(author);
-
-        log.info("Save Success = {}", schedule.getMembers());
-        return scheduleRepository.save(schedule);
+        this.addMember(schedule.getId(),memberDTO);
+        return schedule;
     }
 
     public Optional<Schedule> findSchedule(Long scheduleId){
@@ -57,18 +52,29 @@ public class ScheduleService {
     public Member addMember(Long scheduleId, MemberDTO memberDTO){
         Optional<Schedule> schedule = this.findSchedule(scheduleId);
         if(schedule.isPresent()){
-            Member member = Member.builder()
-                    .name(memberDTO.getName())
-                    .password(memberDTO.getPassword())
-                    .role(Role.BASIC)
-                    .availableDates(new ArrayList<>())
-                    .build();
-            member.updateSchedule(schedule.get());
-            memberRepository.save(member);
-            return member;
+            try{
+                Role role;
+                if (schedule.get().getMembers().isEmpty()) {
+                    role = Role.ADMIN;
+                } else {
+                    role = Role.BASIC;
+                }
+                Member member = Member.builder()
+                        .name(memberDTO.getName())
+                        .password(passwordEncoder.encode(memberDTO.getPassword()))
+                        .role(role)
+                        .availableDates(new ArrayList<>())
+                        .build();
+                member.updateSchedule(schedule.get());
+                memberRepository.save(member);
+                return member;
+            }catch(DataIntegrityViolationException e){
+                //log.info("{}",e);
+            }
         }else{
+            log.info("해당 스케쥴 없음. Id: {}",scheduleId);
             return null;
         }
+        return null;
     }
-
 }

@@ -24,7 +24,7 @@ public class Member {
     @Column(nullable = false)
     private Enum role;
 
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private String name;
 
     @Column

@@ -26,6 +26,7 @@ public class ScheduleController {
      */
     @PostMapping("/new")
     public ResponseEntity<Schedule> createSchedule(@RequestBody ScheduleDTO scheduleDTO) {
+        log.info("{}",scheduleDTO);
         Schedule schedule = scheduleService.createSchedule(scheduleDTO);
         if(schedule!=null){
             return new ResponseEntity<>(schedule, HttpStatus.OK);
