@@ -1,12 +1,15 @@
-package schedully.schedully.schedule;
+package schedully.schedully.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import schedully.schedully.member.Member;
-import schedully.schedully.member.MemberDTO;
+import schedully.schedully.controller.DTO.DateListDTO;
+import schedully.schedully.controller.DTO.MemberDTO;
+import schedully.schedully.controller.DTO.ScheduleDTO;
+import schedully.schedully.domain.*;
+import schedully.schedully.service.ScheduleService;
 
 import java.util.List;
 import java.util.Optional;
@@ -24,7 +27,7 @@ public class ScheduleController {
      * @param scheduleDTO
      * @return 생성된 Schedule 정보 / HttpStatus Code
      */
-    @PostMapping("/new")
+    @PostMapping("/")
     public ResponseEntity<Schedule> createSchedule(@RequestBody ScheduleDTO scheduleDTO) {
         log.info("{}",scheduleDTO);
         Schedule schedule = scheduleService.createSchedule(scheduleDTO);
@@ -71,7 +74,7 @@ public class ScheduleController {
      * @param memberDTO
      * @return 새로운 Member 정보 / HttpStatus Code
      */
-    @PostMapping("/{scheduleId}/members/new")
+    @PostMapping("/{scheduleId}/members")
     public ResponseEntity<Member> addMember(@PathVariable Long scheduleId, @RequestBody MemberDTO memberDTO){
         Member member = scheduleService.addMember(scheduleId,memberDTO);
         if(member != null){
@@ -79,6 +82,16 @@ public class ScheduleController {
         }else{
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
+    }
+
+    /**
+     * Member의 availableDate 정보 저장
+     * @param dateDTO
+     * @return
+     */
+    @PostMapping("/{scheduleId}/{memberId}/availableDate")
+    public ResponseEntity<Member> saveAvailableDate(@RequestBody DateListDTO dateListDTO){
+        return ResponseEntity.ok(scheduleService.saveAvailableDate(dateListDTO));
     }
 
 }

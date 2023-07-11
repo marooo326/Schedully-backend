@@ -1,10 +1,8 @@
-package schedully.schedully.member;
+package schedully.schedully.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
-import schedully.schedully.date.Date;
-import schedully.schedully.schedule.Schedule;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,7 +22,7 @@ public class Member {
     @Column(nullable = false)
     private Enum role;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     private String name;
 
     @Column
@@ -34,12 +32,16 @@ public class Member {
     private List<Date> availableDates = new ArrayList<>();
 
     @JsonIgnore
-    @ManyToOne(cascade = CascadeType.PERSIST)
+    @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "schedule_id")
     private Schedule schedule;
 
     public void updateSchedule(Schedule schedule) {
         this.schedule = schedule;
         schedule.addMember(this);
+    }
+
+    public void addAvailableDate(Date date){
+        this.availableDates.add(date);
     }
 }

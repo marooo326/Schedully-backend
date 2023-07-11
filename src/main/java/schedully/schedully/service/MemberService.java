@@ -1,7 +1,9 @@
-package schedully.schedully.member;
+package schedully.schedully.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import schedully.schedully.domain.Member;
+import schedully.schedully.repository.MemberRepository;
 
 import java.util.List;
 

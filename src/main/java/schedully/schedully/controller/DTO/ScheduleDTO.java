@@ -1,8 +1,7 @@
-package schedully.schedully.schedule;
+package schedully.schedully.controller.DTO;
 
 import lombok.*;
 import org.jetbrains.annotations.NotNull;
-import schedully.schedully.member.MemberDTO;
 
 import java.time.LocalDate;
 

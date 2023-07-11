@@ -1,4 +1,4 @@
-package schedully.schedully.member;
+package schedully.schedully.controller.DTO;
 
 import lombok.*;
 import org.jetbrains.annotations.NotNull;

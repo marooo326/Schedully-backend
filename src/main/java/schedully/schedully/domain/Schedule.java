@@ -1,8 +1,8 @@
-package schedully.schedully.schedule;
+package schedully.schedully.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
-import schedully.schedully.member.Member;
+import schedully.schedully.domain.Member;
 
 import java.time.LocalDate;
 import java.util.List;
