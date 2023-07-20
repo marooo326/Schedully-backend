@@ -5,20 +5,11 @@ import io.jsonwebtoken.security.Keys;
 import jakarta.xml.bind.DatatypeConverter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import schedully.schedully.auth.JwtTokenDTO;
 
 import java.security.Key;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.Date;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -27,20 +18,19 @@ public class JwtTokenProvider {
     private final Key key;
 
     public JwtTokenProvider(@Value("${jwt.secret}") String secretKey) {
-        log.error(secretKey);
         byte[] secretByteKey = DatatypeConverter.parseBase64Binary(secretKey);
         this.key = Keys.hmacShaKeyFor(secretByteKey);
     }
 
-    public JwtTokenDTO generateToken(Authentication authentication) {
-        String authorities = authentication.getAuthorities().stream()
-                .map(GrantedAuthority::getAuthority)
-                .collect(Collectors.joining(","));
+    public JwtTokenDTO generateToken(Long scheduleId, Long memberId) {
+//        String authorities = authentication.getAuthorities().stream()
+//                .map(GrantedAuthority::getAuthority)
+//                .collect(Collectors.joining(","));
 
         //Access Token 생성
         String accessToken = Jwts.builder()
-                .setSubject(authentication.getName())
-                .claim("auth", authorities)
+                .setSubject(memberId.toString())
+                .claim("scheduleId", scheduleId)
                 .setExpiration(new Date(System.currentTimeMillis()+ 1000 * 60 * 30))
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
@@ -58,22 +48,22 @@ public class JwtTokenProvider {
                 .build();
     }
 
-    public Authentication getAuthentication(String accessToken) {
-        //토큰 복호화
-        Claims claims = parseClaims(accessToken);
-
-        if (claims.get("auth") == null) {
-            throw new RuntimeException("권한 정보가 없는 토큰입니다.");
-        }
-
-        Collection<? extends GrantedAuthority> authorities =
-                Arrays.stream(claims.get("auth").toString().split(","))
-                        .map(SimpleGrantedAuthority::new)
-                        .collect(Collectors.toList());
-
-        UserDetails principal = new User(claims.getSubject(), "", authorities);
-        return new UsernamePasswordAuthenticationToken(principal, "", authorities);
-    }
+//    public Authentication getAuthentication(String accessToken) {
+//        //토큰 복호화
+//        Claims claims = parseClaims(accessToken);
+//
+//        if (claims.get("auth") == null) {
+//            throw new RuntimeException("권한 정보가 없는 토큰입니다.");
+//        }
+//
+//        Collection<? extends GrantedAuthority> authorities =
+//                Arrays.stream(claims.get("auth").toString().split(","))
+//                        .map(SimpleGrantedAuthority::new)
+//                        .collect(Collectors.toList());
+//
+//        UserDetails principal = new User(claims.getSubject(), "", authorities);
+//        return new UsernamePasswordAuthenticationToken(principal, "", authorities);
+//    }
 
     public boolean validateToken(String token) {
         try {

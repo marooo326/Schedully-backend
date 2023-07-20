@@ -20,13 +20,14 @@ public class Member {
     private Long id;
 
     @Column(nullable = false)
-    private Enum role;
-
-    @Column(nullable = false)
-    private String name;
+    private String username;
 
     @Column
     private String password;
+
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private Role role;
 
     @OneToMany(mappedBy = "member")
     private List<Date> availableDates = new ArrayList<>();

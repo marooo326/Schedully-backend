@@ -32,15 +32,13 @@ public class SecurityConfig {
     public WebSecurityCustomizer webSecurityCustomizer(){
         return (web) -> web.ignoring()
                 .requestMatchers(
-                        "/api/member/**"
-//                        "/health",
-//                        "/",
-//                        "/swagger-ui.html",
-//                        "/v3/api-docs",
-//                        "/v3/api-docs/**",
-//                        "/swagger-ui/**",
-//                        "/docs/**"
-                        );
+                        "/",
+                        "/swagger-ui.html",
+                        "/v3/api-docs",
+                        "/v3/api-docs/**",
+                        "/swagger-ui/**",
+                        "/docs/**"
+                );
     }
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -51,7 +49,9 @@ public class SecurityConfig {
                 .formLogin(AbstractHttpConfigurer::disable)     // form login 사용 안함
                 .httpBasic(AbstractHttpConfigurer::disable)     // http basic 방식 사용 안함
                 .authorizeHttpRequests(authorize -> authorize   // lambda 방식
-                        .requestMatchers("/api/member").permitAll()
+                        .requestMatchers("/schedule/").permitAll()
+                        .requestMatchers("/schedule/*/join").permitAll()
+                        .requestMatchers("/schedule/*/login").permitAll()
                 )
                 .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class)
                 .build();

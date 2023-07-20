@@ -25,7 +25,4 @@ public class ScheduleDTO {
 
     @NotNull
     private LocalDate endDate;
-
-    @NotNull
-    private MemberDTO author;
 }

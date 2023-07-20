@@ -3,8 +3,6 @@ package schedully.schedully.auth.filter;
 import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.GenericFilterBean;
 import schedully.schedully.auth.provider.JwtTokenProvider;
@@ -22,13 +20,13 @@ public class JwtAuthenticationFilter extends GenericFilterBean {
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
         String token = resolveToken((HttpServletRequest) request);
 
-        // 토큰 유효성 검사
-        if (token!=null && jwtTokenProvider.validateToken(token)) {
-            Authentication authentication = jwtTokenProvider.getAuthentication(token);
-            SecurityContextHolder.getContext().setAuthentication(authentication);
-        }
+        // 토큰 유효성 검사 필요
+//        if (token!=null && jwtTokenProvider.validateToken(token)) {
+//            Authentication authentication = jwtTokenProvider.getAuthentication(token);
+//            SecurityContextHolder.getContext().setAuthentication(authentication);
+//        }
 
-        log.trace("JwtAuthenticationFilter's doFilter : "+token);
+        log.trace("JwtAuthenticationFilter's [doFilter] : " + token);
         chain.doFilter(request, response);
     }
 

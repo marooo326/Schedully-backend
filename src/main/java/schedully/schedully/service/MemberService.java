@@ -1,19 +1,114 @@
 package schedully.schedully.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import schedully.schedully.auth.JwtTokenDTO;
+import schedully.schedully.controller.DTO.DateListDTO;
+import schedully.schedully.controller.DTO.LoginRequestDTO;
+import schedully.schedully.controller.DTO.SignUpRequestDTO;
+import schedully.schedully.domain.Date;
 import schedully.schedully.domain.Member;
+import schedully.schedully.auth.provider.JwtTokenProvider;
+import schedully.schedully.domain.Role;
+import schedully.schedully.domain.Schedule;
+import schedully.schedully.repository.DateRepository;
 import schedully.schedully.repository.MemberRepository;
+import schedully.schedully.repository.ScheduleRepository;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class MemberService {
+    private final ScheduleRepository scheduleRepository;
     private final MemberRepository memberRepository;
+    private final DateRepository dateRepository;
 
-    public List<Member> findAll(){
-        return memberRepository.findAll();
+    private final JwtTokenProvider jwtTokenProvider;
+    private final PasswordEncoder passwordEncoder;
+
+
+    public List<Member> findAllMember(Long scheduleId){
+        return memberRepository.findByScheduleJpql(scheduleId);
     }
 
+    public Member signUp(Long scheduleId, SignUpRequestDTO memberDTO) throws Exception{
+        Optional<Schedule> schedule = scheduleRepository.findById(scheduleId);
+        if(schedule.isPresent()){
+            try{
+                Schedule scheduleEntity = schedule.get();
+                List<Member> memberList = scheduleEntity.getMembers();
+
+                // 중복체크
+                for (Member member : memberList){
+                    if (member.getUsername().equals(memberDTO.getUsername())) {
+                        throw new Exception("이미 존재하는 이름입니다.");
+                    }
+                }
+
+                // 비밀번호 확인
+                if (!memberDTO.getPassword().equals(memberDTO.getCheckedPassword())) {
+                    throw new Exception("비밀번호가 일치하지 않습니다.");
+                }
+
+                Role role;
+                if (schedule.get().getMembers().isEmpty()) {
+                    role = Role.ADMIN;
+                } else {
+                    role = Role.USER;
+                }
+
+                Member member = Member.builder()
+                        .username(memberDTO.getUsername())
+                        .password(passwordEncoder.encode(memberDTO.getPassword()))
+                        .role(role)
+                        .availableDates(new ArrayList<>())
+                        .build();
+                member.updateSchedule(schedule.get());
+                memberRepository.save(member);
+                // 유저 Authrity에 추가해줘야 Login 시 검증 가능한데..
+                return member;
+
+            }catch(DataIntegrityViolationException e){
+                //log.info("{}",e);
+            }
+        }else{
+            log.info("해당 스케쥴 없음. Id: {}",scheduleId);
+            return null;
+        }
+        return null;
+    }
+
+    public JwtTokenDTO login(Long scheduleId, LoginRequestDTO loginForm){
+        Member member = memberRepository.findByUsernameAndSchedule_Id(loginForm.getUsername(), scheduleId);
+        return jwtTokenProvider.generateToken(member.getId(),scheduleId);
+    }
+
+    public Member saveAvailableDate(DateListDTO dateListDTO){
+        Optional<Member> member = memberRepository.findById(dateListDTO.getMemberId());
+        if (member.isPresent()){
+            Member memberEntity = member.get();
+            if (memberEntity.getSchedule().getId() == dateListDTO.getScheduleId()) {
+                log.trace("{}",dateListDTO.getDates());
+                for (LocalDate dateDTO : dateListDTO.getDates()) {
+                    // Date 객체 생성
+                    Date date = Date.builder()
+                            .date(dateDTO)
+                            .build();
+                    date.updateMember(memberEntity);
+                    dateRepository.save(date);
+                }
+            } else {
+                log.info("존재하지 않는 멤버");
+            }
+        }
+        return null;
+    }
 }

@@ -8,9 +8,9 @@ import org.jetbrains.annotations.NotNull;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor(force = true)
-public class MemberDTO {
+public class LoginRequestDTO {
     @NotNull
-    private String name;
+    private String username;
 
     @NotNull
     private String password;
