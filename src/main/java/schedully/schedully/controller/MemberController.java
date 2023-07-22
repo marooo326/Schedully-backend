@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import schedully.schedully.auth.JwtTokenDTO;
+import schedully.schedully.auth.JwtToken;
 import schedully.schedully.controller.DTO.DateListDTO;
 import schedully.schedully.controller.DTO.LoginRequestDTO;
 import schedully.schedully.controller.DTO.SignUpRequestDTO;
@@ -47,12 +47,12 @@ public class MemberController {
     }
 
     @PostMapping("/{scheduleId}/login")
-    public ResponseEntity<JwtTokenDTO> login(@PathVariable Long scheduleId, @RequestBody LoginRequestDTO loginForm){
+    public ResponseEntity<JwtToken> login(@PathVariable Long scheduleId, @RequestBody LoginRequestDTO loginForm){
         try {
-            //memberService.findMemberByUsername(loginForm.getUsername(), scheduleId);
-            JwtTokenDTO token = memberService.login(scheduleId,loginForm);
+            JwtToken token = memberService.login(scheduleId,loginForm);
             return new ResponseEntity<>(token, HttpStatus.OK);
         } catch (Exception e) {
+            log.error(e.toString());
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 
         }

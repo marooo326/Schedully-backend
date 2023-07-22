@@ -3,9 +3,13 @@ package schedully.schedully.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import schedully.schedully.auth.JwtTokenDTO;
+import schedully.schedully.auth.JwtToken;
 import schedully.schedully.controller.DTO.DateListDTO;
 import schedully.schedully.controller.DTO.LoginRequestDTO;
 import schedully.schedully.controller.DTO.SignUpRequestDTO;
@@ -31,6 +35,7 @@ public class MemberService {
     private final MemberRepository memberRepository;
     private final DateRepository dateRepository;
 
+    private final AuthenticationManagerBuilder authenticationManagerBuilder;
     private final JwtTokenProvider jwtTokenProvider;
     private final PasswordEncoder passwordEncoder;
 
@@ -73,11 +78,10 @@ public class MemberService {
                         .build();
                 member.updateSchedule(schedule.get());
                 memberRepository.save(member);
-                // 유저 Authrity에 추가해줘야 Login 시 검증 가능한데..
                 return member;
 
             }catch(DataIntegrityViolationException e){
-                //log.info("{}",e);
+                log.info(e.toString());
             }
         }else{
             log.info("해당 스케쥴 없음. Id: {}",scheduleId);
@@ -86,9 +90,17 @@ public class MemberService {
         return null;
     }
 
-    public JwtTokenDTO login(Long scheduleId, LoginRequestDTO loginForm){
-        Member member = memberRepository.findByUsernameAndSchedule_Id(loginForm.getUsername(), scheduleId);
-        return jwtTokenProvider.generateToken(member.getId(),scheduleId);
+    public JwtToken login(Long scheduleId, LoginRequestDTO loginForm) {
+
+
+        UsernamePasswordAuthenticationToken temp = new UsernamePasswordAuthenticationToken(loginForm.getUsername(), loginForm.getPassword());
+        temp.setDetails(scheduleId);
+        SecurityContextHolder.getContext().setAuthentication(temp);
+
+        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(loginForm.getUsername(), loginForm.getPassword());
+
+        Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
+        return jwtTokenProvider.generateToken(authentication);
     }
 
     public Member saveAvailableDate(DateListDTO dateListDTO){

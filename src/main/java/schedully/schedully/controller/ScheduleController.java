@@ -19,9 +19,8 @@ public class ScheduleController {
 
     private final ScheduleService scheduleService;
 
-    @PostMapping("/")
+    @PostMapping(value = {"","/"})
     public ResponseEntity<Schedule> createSchedule(@RequestBody ScheduleDTO scheduleDTO) {
-        log.trace("{}",scheduleDTO);
         Schedule schedule = scheduleService.createSchedule(scheduleDTO);
         if(schedule!=null){
             return new ResponseEntity<>(schedule, HttpStatus.OK);
