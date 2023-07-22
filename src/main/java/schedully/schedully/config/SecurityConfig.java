@@ -45,13 +45,15 @@ public class SecurityConfig {
         return http
                 .csrf(AbstractHttpConfigurer::disable) // 비활성화
                 .cors(AbstractHttpConfigurer::disable)
-                .sessionManagement(manage-> manage.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // Session 사용 안함
+                .sessionManagement(manage -> manage.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // Session 사용 안함
                 .formLogin(AbstractHttpConfigurer::disable)     // form login 사용 안함
                 .httpBasic(AbstractHttpConfigurer::disable)     // http basic 방식 사용 안함
                 .authorizeHttpRequests(authorize -> authorize   // lambda 방식
-                        .requestMatchers("/schedule/").permitAll()
-                        .requestMatchers("/schedule/*/join").permitAll()
-                        .requestMatchers("/schedule/*/login").permitAll()
+                        .requestMatchers("/schedule", "/schedule/").permitAll()
+                        .requestMatchers("/schedule/{scheduleId}/join").permitAll()
+                        .requestMatchers("/schedule/{scheduleId}/login").permitAll()
+                        .anyRequest().authenticated()
+
                 )
                 .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class)
                 .build();
