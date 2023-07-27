@@ -19,6 +19,8 @@ public class CustomUserDetails implements UserDetails {
     private Collection<? extends GrantedAuthority> authorities;
     private boolean enabled;
 
+
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return authorities;

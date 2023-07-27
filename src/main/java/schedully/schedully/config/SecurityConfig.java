@@ -1,9 +1,12 @@
 package schedully.schedully.config;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -16,6 +19,7 @@ import schedully.schedully.auth.filter.JwtAuthenticationFilter;
 import schedully.schedully.auth.provider.JwtTokenProvider;
 
 
+@Slf4j
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
@@ -29,18 +33,6 @@ public class SecurityConfig {
     }
 
     @Bean
-    public WebSecurityCustomizer webSecurityCustomizer(){
-        return (web) -> web.ignoring()
-                .requestMatchers(
-                        "/",
-                        "/swagger-ui.html",
-                        "/v3/api-docs",
-                        "/v3/api-docs/**",
-                        "/swagger-ui/**",
-                        "/docs/**"
-                );
-    }
-    @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         return http
                 .csrf(AbstractHttpConfigurer::disable) // 비활성화
@@ -48,14 +40,24 @@ public class SecurityConfig {
                 .sessionManagement(manage -> manage.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // Session 사용 안함
                 .formLogin(AbstractHttpConfigurer::disable)     // form login 사용 안함
                 .httpBasic(AbstractHttpConfigurer::disable)     // http basic 방식 사용 안함
+                .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests(authorize -> authorize   // lambda 방식
-                        .requestMatchers("/schedule", "/schedule/").permitAll()
+                        .requestMatchers(
+                                "",
+                                "/",
+                                "/schedule",
+                                "/schedule/",
+                                "/swagger-ui.html",
+                                "/v3/api-docs",
+                                "/v3/api-docs/**",
+                                "/swagger-ui/",
+                                "/swagger-ui/**",
+                                "/docs/**").permitAll()
                         .requestMatchers("/schedule/{scheduleId}/join").permitAll()
                         .requestMatchers("/schedule/{scheduleId}/login").permitAll()
                         .anyRequest().authenticated()
 
                 )
-                .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
 }

@@ -2,6 +2,7 @@ package schedully.schedully.auth.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -11,6 +12,8 @@ import schedully.schedully.auth.common.CustomUserDetails;
 import schedully.schedully.domain.Member;
 import schedully.schedully.repository.MemberRepository;
 
+import java.util.Collections;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -19,6 +22,7 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+
         // 데이터베이스에서 사용자 정보를 가져와서 UserDetails 객체를 생성하여 반환
         Long scheduleId = (Long) SecurityContextHolder.getContext().getAuthentication().getDetails();
         Member memberEntity = memberRepository.findByUsernameAndSchedule_Id(username,scheduleId);
@@ -30,7 +34,7 @@ public class CustomUserDetailsService implements UserDetailsService {
         return CustomUserDetails.builder()
                 .username(memberEntity.getUsername())
                 .password(memberEntity.getPassword())
-                //.roles(memberEntity.getRole())
+                .authorities(Collections.singletonList(new SimpleGrantedAuthority(memberEntity.getRole().toString())))
                 .build();
     }
 }

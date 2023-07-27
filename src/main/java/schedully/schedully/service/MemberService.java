@@ -92,15 +92,14 @@ public class MemberService {
 
     public JwtToken login(Long scheduleId, LoginRequestDTO loginForm) {
 
-
-        UsernamePasswordAuthenticationToken temp = new UsernamePasswordAuthenticationToken(loginForm.getUsername(), loginForm.getPassword());
-        temp.setDetails(scheduleId);
-        SecurityContextHolder.getContext().setAuthentication(temp);
+        // CustomUserDetailsService로 scheduleId를 전달하기 위한 토큰
+        UsernamePasswordAuthenticationToken tempToken = new UsernamePasswordAuthenticationToken(loginForm.getUsername(), loginForm.getPassword());
+        tempToken.setDetails(scheduleId);
+        SecurityContextHolder.getContext().setAuthentication(tempToken);
 
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(loginForm.getUsername(), loginForm.getPassword());
-
         Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
-        return jwtTokenProvider.generateToken(authentication);
+        return jwtTokenProvider.generateToken(authentication, scheduleId);
     }
 
     public Member saveAvailableDate(DateListDTO dateListDTO){

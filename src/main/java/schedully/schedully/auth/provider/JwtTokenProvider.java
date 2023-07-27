@@ -9,10 +9,10 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import schedully.schedully.auth.JwtToken;
+import schedully.schedully.auth.common.CustomUserDetails;
 
 import java.security.Key;
 import java.util.Arrays;
@@ -35,15 +35,17 @@ public class JwtTokenProvider {
         this.secret = Keys.hmacShaKeyFor(secretByteKey);
     }
 
-    public JwtToken generateToken(Authentication authentication) {
+    public JwtToken generateToken(Authentication authentication, Long scheduleId) {
         String authorities = authentication.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.joining(","));
+        log.info(authorities);
 
         //Access Token 생성
         String accessToken = Jwts.builder()
                 .setSubject(authentication.getName())
                 .claim("auth",authorities)
+                .claim("scheduleId",scheduleId)
                 .setExpiration(accessExpirationDate)
                 .signWith(secret, SignatureAlgorithm.HS256)
                 .compact();
@@ -66,6 +68,8 @@ public class JwtTokenProvider {
 
         if (claims.get("auth") == null) {
             throw new RuntimeException("권한 정보가 없는 토큰입니다.");
+        }else if (claims.get("scheduleId") == null){
+            throw new RuntimeException("스케쥴 ID 정보가 없는 토큰입니다.");
         }
 
         Collection<? extends GrantedAuthority> authorities =
@@ -73,7 +77,15 @@ public class JwtTokenProvider {
                         .map(SimpleGrantedAuthority::new)
                         .collect(Collectors.toList());
 
-        UserDetails principal = new User(claims.getSubject(), "", authorities);
+        Long scheduleId = Long.valueOf(claims.get("scheduleId").toString());
+
+        UserDetails principal = CustomUserDetails.builder()
+                .username(claims.getSubject())
+                .password("")
+                .authorities(authorities)
+                .scheduleId(scheduleId)
+                .build();
+
         return new UsernamePasswordAuthenticationToken(principal, "", authorities);
     }
 

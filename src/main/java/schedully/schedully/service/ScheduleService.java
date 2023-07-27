@@ -30,10 +30,7 @@ public class ScheduleService {
                 .members(new ArrayList<>())
                 .build();
 
-        schedule = scheduleRepository.save(schedule);
-
-        //this.addMember(schedule.getId(),memberDTO);
-        return schedule;
+        return scheduleRepository.save(schedule);
     }
 
     public Optional<Schedule> findSchedule(Long scheduleId){
