@@ -16,6 +16,7 @@ public class CustomUserDetails implements UserDetails {
     private String username;
     private String password;
     private Long scheduleId;
+    private Long memberId;
     private Collection<? extends GrantedAuthority> authorities;
     private boolean enabled;
 

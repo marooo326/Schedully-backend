@@ -46,7 +46,6 @@ public class SecurityConfig {
                                 "",
                                 "/",
                                 "/schedule",
-                                "/schedule/",
                                 "/swagger-ui.html",
                                 "/v3/api-docs",
                                 "/v3/api-docs/**",

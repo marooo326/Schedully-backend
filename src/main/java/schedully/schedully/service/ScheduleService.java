@@ -5,7 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import schedully.schedully.controller.DTO.ScheduleDTO;
+import org.webjars.NotFoundException;
+import schedully.schedully.controller.dto.ScheduleRequestDto;
 import schedully.schedully.domain.*;
 import schedully.schedully.repository.ScheduleRepository;
 
@@ -19,22 +20,26 @@ public class ScheduleService {
     private final ScheduleRepository scheduleRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public Schedule createSchedule(@NotNull ScheduleDTO scheduleDTO) {
+    public Schedule createSchedule(@NotNull ScheduleRequestDto.CreateDto createDto) {
 
         Schedule schedule = Schedule.builder()
-                .title(scheduleDTO.getTitle())
-                .password(passwordEncoder.encode(scheduleDTO.getPassword()))
-                .content(scheduleDTO.getContent())
-                .startDate(scheduleDTO.getStartDate())
-                .endDate(scheduleDTO.getEndDate())
+                .title(createDto.getTitle())
+                .password(passwordEncoder.encode(createDto.getPassword()))
+                .content(createDto.getExplanation())
+                .startDate(createDto.getStartDate())
+                .endDate(createDto.getEndDate())
                 .members(new ArrayList<>())
                 .build();
 
         return scheduleRepository.save(schedule);
     }
 
-    public Optional<Schedule> findSchedule(Long scheduleId){
-        return scheduleRepository.findById(scheduleId);
+    public Schedule findSchedule(Long scheduleId){
+        Optional<Schedule> schedule = scheduleRepository.findById(scheduleId);
+        if (schedule.isEmpty()) {
+            throw new NotFoundException("존재하지 않는 스케쥴");
+        }
+        return schedule.get();
     }
 
 }

@@ -30,10 +30,12 @@ public class CustomUserDetailsService implements UserDetailsService {
             throw new UsernameNotFoundException("사용자를 찾을 수 없습니다: " + username);
         }
 
-        // 사용자 정보를 UserDetails 객체로 변환하여 반환
+        // 사용자 정보를 UserDetails 객체로 변환하여 반환하면
         return CustomUserDetails.builder()
                 .username(memberEntity.getUsername())
                 .password(memberEntity.getPassword())
+                .scheduleId(scheduleId)
+                .memberId(memberEntity.getId())
                 .authorities(Collections.singletonList(new SimpleGrantedAuthority(memberEntity.getRole().toString())))
                 .build();
     }
