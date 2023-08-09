@@ -1,14 +1,15 @@
 package schedully.schedully.controller;
 
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import schedully.schedully.auth.JwtToken;
+import schedully.schedully.auth.AuthMember;
+import schedully.schedully.auth.dto.JwtToken;
 import schedully.schedully.controller.dto.AuthRequestDto;
+import schedully.schedully.controller.dto.DateRequestDto;
 import schedully.schedully.converter.AuthConverter;
 import schedully.schedully.domain.Member;
 import schedully.schedully.service.MemberService;
@@ -63,17 +64,18 @@ public class MemberController {
         }
     }
 
-//
-//    @GetMapping("/{scheduleId}/dates")
-//    public ResponseEntity<Member> getAvailableDates(@PathVariable Long scheduleId, @RequestParam("memberId") Long memberId, HttpServletRequest request){
-//        String token = request.getHeader("Authorization").substring(7);
-//        log.info(token);
-//        return ResponseEntity.ok(null);
-//
-//    }
+    @GetMapping("/{scheduleId}/allDates")
+    public ResponseEntity<Member> getAvailableDates(@PathVariable Long scheduleId, @AuthMember Member member){
+        return ResponseEntity.ok(null);
+    }
 
-//    @PutMapping("/{scheduleId}/{memberId}/dates")
-//    public ResponseEntity<Member> updateAvailableDates(@RequestBody @Valid ){
-//        return ResponseEntity.ok(memberService.saveAvailableDate(dateRequestDto));
-//    }
+    @PutMapping("/{scheduleId}/dates")
+    public ResponseEntity<Member> updateAvailableDates(@PathVariable Long scheduleId, @RequestBody @Valid DateRequestDto.DateListDto dateListDto, @AuthMember Long memberId){
+        // 임시 try catch
+        try{
+            return ResponseEntity.ok(memberService.saveAvailableDates(memberId, dateListDto.getDateList()));
+        } catch (Exception e) {
+          return null;
+        }
+    }
 }

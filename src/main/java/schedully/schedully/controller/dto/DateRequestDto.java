@@ -4,6 +4,7 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 
 import java.time.LocalDate;
+import java.util.List;
 
 public class DateRequestDto {
     @Getter
@@ -16,5 +17,11 @@ public class DateRequestDto {
 
         @NotBlank
         private boolean afternoonAvailable;
+    }
+
+    @Getter
+    public static class DateListDto {
+        @NotBlank
+        List<DateDto> dateList;
     }
 }

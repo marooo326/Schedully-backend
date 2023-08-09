@@ -26,29 +26,28 @@ public class JwtAuthenticationFilter extends GenericFilterBean {
         String token = resolveToken((HttpServletRequest) request);
         log.info("수신한 JWT 토큰 : " + token);
 
+        // null 이거나 유효하지 않은 토큰인지 검사
         if (token!=null && jwtTokenProvider.validateToken(token)) {
-            // 토큰에서 Authentication 객체 가져오기
-            Authentication authentication = jwtTokenProvider.getAuthentication(token);
-            SecurityContextHolder.getContext().setAuthentication(authentication);
-
-            // Schedule Id 가져오기
-            Long scheduleId = ((CustomUserDetails) authentication.getPrincipal()).getScheduleId();
-
             // uriParams : "/schedule/id/members" -> {"","schedule","id","members"} 와 같이 변환됨
             String[] uriParams = ((HttpServletRequest) request).getRequestURI().split("/");
 
-            // 파라미터가 3개 이상인 경우 (맨 앞 빈 파라미터 포함)
-            if(uriParams.length>=3){
-                boolean isScheduleRequest = uriParams[1].equals("schedule");
+            // 파라미터가 3개 이상이고 schedule 관련된 요청인 경우
+            if (uriParams.length >= 3 && uriParams[1].equals("schedule")) {
                 String paramScheduleId = uriParams[2];
-                if(!isScheduleRequest){
-                    log.error("Schedule 관련 요청이 아닙니다 : " + ((HttpServletRequest) request).getRequestURI());
-                }
-                else if(!paramScheduleId.equals(scheduleId.toString())){
-                    log.error(((HttpServletRequest) request).getRequestURI());
+
+                // 토큰에서 Authentication 객체 및 scheduleId 가져오기
+                Authentication authentication = jwtTokenProvider.getAuthentication(token);
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+                Long tokenScheduleId = ((CustomUserDetails) authentication.getPrincipal()).getScheduleId();
+
+                // 토큰의 schedule Id와 요청 URI 의 schedule Id 파라미터가 같은지 확인
+                if (!paramScheduleId.equals(tokenScheduleId.toString())) {
+                    log.error("잘못된 접근입니다. : " + ((HttpServletRequest) request).getRequestURI());
                     ((HttpServletResponse) response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                     return;
                 }
+            } else {
+                log.info("토큰 검증이 필요하지 않은 요청입니다. : " + ((HttpServletRequest) request).getRequestURI());
             }
         }
 

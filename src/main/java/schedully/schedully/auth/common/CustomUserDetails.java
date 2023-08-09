@@ -13,10 +13,9 @@ import java.util.Collection;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class CustomUserDetails implements UserDetails {
 
-    private String username;
+    private String username; //memberId를 저장
     private String password;
     private Long scheduleId;
-    private Long memberId;
     private Collection<? extends GrantedAuthority> authorities;
     private boolean enabled;
 

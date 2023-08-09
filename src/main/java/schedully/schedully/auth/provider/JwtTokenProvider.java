@@ -11,7 +11,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
-import schedully.schedully.auth.JwtToken;
+import schedully.schedully.auth.dto.JwtToken;
 import schedully.schedully.auth.common.CustomUserDetails;
 
 import java.security.Key;
@@ -35,7 +35,7 @@ public class JwtTokenProvider {
         this.secret = Keys.hmacShaKeyFor(secretByteKey);
     }
 
-    public JwtToken generateToken(Authentication authentication, Long scheduleId, Long memberId) {
+    public JwtToken generateToken(Authentication authentication, String memberId, Long scheduleId) {
         String authorities = authentication.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.joining(","));
@@ -43,10 +43,9 @@ public class JwtTokenProvider {
 
         //Access Token 생성
         String accessToken = Jwts.builder()
-                .setSubject(memberId.toString())
+                .setSubject(memberId)
                 .claim("auth",authorities)
                 .claim("scheduleId",scheduleId)
-                .claim("memberId", memberId)
                 .setExpiration(accessExpirationDate)
                 .signWith(secret, SignatureAlgorithm.HS256)
                 .compact();
@@ -71,24 +70,22 @@ public class JwtTokenProvider {
             throw new RuntimeException("권한 정보가 없는 토큰입니다.");
         }else if (claims.get("scheduleId") == null){
             throw new RuntimeException("스케쥴 ID 정보가 없는 토큰입니다.");
-        }else if (claims.get("memberId") == null){
+        }else if (claims.getSubject() == null){
             throw new RuntimeException("멤버 정보가 없는 토큰입니다.");
         }
+
+        Long scheduleId = Long.valueOf(claims.get("scheduleId").toString());
 
         Collection<? extends GrantedAuthority> authorities =
                 Arrays.stream(claims.get("auth").toString().split(","))
                         .map(SimpleGrantedAuthority::new)
                         .collect(Collectors.toList());
 
-        Long scheduleId = Long.valueOf(claims.get("scheduleId").toString());
-        Long memberId = Long.valueOf(claims.get("memberId").toString());
-
         UserDetails principal = CustomUserDetails.builder()
                 .username(claims.getSubject())
                 .password("")
                 .authorities(authorities)
                 .scheduleId(scheduleId)
-                .memberId(memberId)
                 .build();
 
         return new UsernamePasswordAuthenticationToken(principal, "", authorities);

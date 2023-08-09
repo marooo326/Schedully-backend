@@ -1,4 +1,4 @@
-package schedully.schedully.auth;
+package schedully.schedully.auth.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
