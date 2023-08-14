@@ -8,7 +8,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.GenericFilterBean;
-import schedully.schedully.auth.common.CustomUserDetails;
+import schedully.schedully.auth.domain.CustomUserDetails;
 import schedully.schedully.auth.provider.JwtTokenProvider;
 
 import java.io.IOException;
@@ -27,7 +27,7 @@ public class JwtAuthenticationFilter extends GenericFilterBean {
         log.info("수신한 JWT 토큰 : " + token);
 
         // null 이거나 유효하지 않은 토큰인지 검사
-        if (token!=null && jwtTokenProvider.validateToken(token)) {
+        if (token!=null && jwtTokenProvider.validateAccessToken(token)) {
             // uriParams : "/schedule/id/members" -> {"","schedule","id","members"} 와 같이 변환됨
             String[] uriParams = ((HttpServletRequest) request).getRequestURI().split("/");
 
@@ -50,7 +50,6 @@ public class JwtAuthenticationFilter extends GenericFilterBean {
                 log.info("토큰 검증이 필요하지 않은 요청입니다. : " + ((HttpServletRequest) request).getRequestURI());
             }
         }
-
         chain.doFilter(request, response);
     }
 

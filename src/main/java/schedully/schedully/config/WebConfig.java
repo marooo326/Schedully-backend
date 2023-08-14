@@ -3,7 +3,7 @@ package schedully.schedully.config;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-import schedully.schedully.auth.AuthMemberArgumentResolver;
+import schedully.schedully.auth.resolver.AuthMemberArgumentResolver;
 
 import java.util.List;
 

@@ -8,7 +8,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-import schedully.schedully.auth.common.CustomUserDetails;
+import schedully.schedully.auth.domain.CustomUserDetails;
 import schedully.schedully.domain.Member;
 import schedully.schedully.repository.MemberRepository;
 

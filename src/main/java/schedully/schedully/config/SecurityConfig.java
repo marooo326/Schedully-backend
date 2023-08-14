@@ -52,8 +52,9 @@ public class SecurityConfig {
                                 "/swagger-ui/",
                                 "/swagger-ui/**",
                                 "/docs/**").permitAll()
-                        .requestMatchers("/schedule/{scheduleId}/join").permitAll()
+                        .requestMatchers("/schedule/{scheduleId}/signup").permitAll()
                         .requestMatchers("/schedule/{scheduleId}/login").permitAll()
+                        .requestMatchers("/schedule/{scheduleId}/refresh").permitAll()
                         .anyRequest().authenticated()
 
                 )

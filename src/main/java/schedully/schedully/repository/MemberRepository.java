@@ -9,10 +9,12 @@ import java.util.List;
 
 public interface MemberRepository extends JpaRepository<Member, Long> {
 
-    Member findByUsername(String username);
     @Query("SELECT m FROM Member AS m WHERE m.schedule.id=:scheduleId")
     List<Member> findByScheduleJpql(@Param("scheduleId") Long id);
 
     Member findByUsernameAndSchedule_Id(String username,Long scheduleId);
+
+    @Query("SELECT m.schedule.id FROM Member m WHERE m.id=:memberId")
+    Long findScheduleIdByIdJpql(@Param("memberId") Long id);
 }
 

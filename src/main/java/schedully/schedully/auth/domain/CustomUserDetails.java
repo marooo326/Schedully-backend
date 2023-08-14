@@ -1,4 +1,4 @@
-package schedully.schedully.auth.common;
+package schedully.schedully.auth.domain;
 
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
@@ -13,13 +13,11 @@ import java.util.Collection;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class CustomUserDetails implements UserDetails {
 
-    private String username; //memberId를 저장
+    private String username; //memberId
     private String password;
     private Long scheduleId;
     private Collection<? extends GrantedAuthority> authorities;
     private boolean enabled;
-
-
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

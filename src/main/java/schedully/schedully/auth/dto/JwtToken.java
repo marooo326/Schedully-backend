@@ -1,12 +1,11 @@
 package schedully.schedully.auth.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 
 @Builder
-@Data
-@AllArgsConstructor
+@Getter
+@Setter
+@AllArgsConstructor (access = AccessLevel.PRIVATE)
 public class JwtToken {
     private String grantType;
     private String accessToken;
