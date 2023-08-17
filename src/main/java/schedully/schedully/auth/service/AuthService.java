@@ -6,9 +6,11 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.context.request.RequestAttributes;
+import org.springframework.web.context.request.RequestContextHolder;
 import schedully.schedully.auth.domain.CustomUserDetails;
 import schedully.schedully.auth.dto.JwtToken;
 import schedully.schedully.auth.provider.JwtTokenProvider;
@@ -20,6 +22,7 @@ import schedully.schedully.repository.MemberRepository;
 import schedully.schedully.repository.ScheduleRepository;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -78,20 +81,22 @@ public class AuthService {
 
     public JwtToken login(Long scheduleId, String username, String password) {
         // 추후 적용
-        // RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
-        // requestAttributes.setAttribute("scheduleId", scheduleId, RequestAttributes.SCOPE_REQUEST);
+        RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
+        if (requestAttributes != null) {
+            requestAttributes.setAttribute("scheduleId", scheduleId, RequestAttributes.SCOPE_REQUEST);
+        }
 
-        // CustomUserDetailsService 로 scheduleId를 전달하기 위한 토큰
-        UsernamePasswordAuthenticationToken scheduleIdToken = new UsernamePasswordAuthenticationToken(username, password);
-        scheduleIdToken.setDetails(scheduleId);
-        SecurityContextHolder.getContext().setAuthentication(scheduleIdToken);
+//        // CustomUserDetailsService 로 scheduleId를 전달하기 위한 토큰
+//        UsernamePasswordAuthenticationToken scheduleIdToken = new UsernamePasswordAuthenticationToken(username, password);
+//        scheduleIdToken.setDetails(scheduleId);
+//        SecurityContextHolder.getContext().setAuthentication(scheduleIdToken);
 
         // loginForm 의 정보로 authenticationToken 인스턴스 및 authentication 인스턴스 생성 (-> CustomUserDetailService)
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(username, password);
         // AuthenticationProvider 에 의해 CustomUserDetailService 호출됨
         Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
         CustomUserDetails principal = (CustomUserDetails) authentication.getPrincipal();
-        return jwtTokenProvider.generateToken(authentication, principal.getUsername(),scheduleId);
+        return jwtTokenProvider.generateToken(authentication, principal.getUsername(), scheduleId);
     }
 
     public String regenerateAccessToken(String refreshToken) {
@@ -101,17 +106,18 @@ public class AuthService {
             Member memberEntity = member.get();
             Long scheduleId = memberRepository.findScheduleIdByIdJpql(memberId);
 
-            // CustomUserDetailsService 로 scheduleId를 전달하기 위한 토큰
-            UsernamePasswordAuthenticationToken scheduleIdToken = new UsernamePasswordAuthenticationToken(memberEntity.getUsername(), memberEntity.getPassword());
-            scheduleIdToken.setDetails(memberEntity.getSchedule().getId());
-            SecurityContextHolder.getContext().setAuthentication(scheduleIdToken);
+            RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
+            if (requestAttributes != null) {
+                requestAttributes.setAttribute("scheduleId", scheduleId, RequestAttributes.SCOPE_REQUEST);
+            }
 
-            // loginForm 의 정보로 authenticationToken 인스턴스 및 authentication 인스턴스 생성 (-> CustomUserDetailService)
-            UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(memberEntity.getUsername(), memberEntity.getPassword());
-            // AuthenticationProvider 에 의해 CustomUserDetailService 호출됨
-            Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
-            CustomUserDetails principal = (CustomUserDetails) authentication.getPrincipal();
-            return jwtTokenProvider.generateAccessToken(authentication, principal.getUsername(), scheduleId);
+            Authentication authentication = new UsernamePasswordAuthenticationToken(
+                    memberEntity.getUsername(),
+                    "",
+                    Collections.singletonList(new SimpleGrantedAuthority(memberEntity.getRole().toString()))
+            );
+
+            return jwtTokenProvider.generateAccessToken(authentication, memberEntity.getUsername(), scheduleId);
         } else {
             log.info("DB에 해당 토큰 멤버 정보가 존재하지 않습니다.");
         }

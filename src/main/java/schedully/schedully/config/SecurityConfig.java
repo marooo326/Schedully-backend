@@ -4,11 +4,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -17,7 +14,6 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import schedully.schedully.auth.filter.JwtAuthenticationFilter;
 import schedully.schedully.auth.provider.JwtTokenProvider;
-
 
 @Slf4j
 @Configuration
@@ -28,7 +24,7 @@ public class SecurityConfig {
     private final JwtTokenProvider jwtTokenProvider;
 
     @Bean
-    public PasswordEncoder passwordEncoder() {
+    public static PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
@@ -40,7 +36,6 @@ public class SecurityConfig {
                 .sessionManagement(manage -> manage.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // Session 사용 안함
                 .formLogin(AbstractHttpConfigurer::disable)     // form login 사용 안함
                 .httpBasic(AbstractHttpConfigurer::disable)     // http basic 방식 사용 안함
-                .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests(authorize -> authorize   // lambda 방식
                         .requestMatchers(
                                 "",
@@ -54,10 +49,10 @@ public class SecurityConfig {
                                 "/docs/**").permitAll()
                         .requestMatchers("/schedule/{scheduleId}/signup").permitAll()
                         .requestMatchers("/schedule/{scheduleId}/login").permitAll()
-                        .requestMatchers("/schedule/{scheduleId}/refresh").permitAll()
+                        .requestMatchers("/refresh").permitAll()
                         .anyRequest().authenticated()
-
                 )
+                .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
 }

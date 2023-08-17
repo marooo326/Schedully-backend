@@ -28,7 +28,7 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/schedule/{scheduleId}/signup")
-    public ResponseEntity<AuthResponseDto.SignUpDto> signUp(@PathVariable Long scheduleId, @RequestBody @Valid AuthRequestDto.SignUpDto signUpForm){
+    public ResponseEntity<AuthResponseDto.SignUpDto> signUp(@PathVariable Long scheduleId, @RequestBody @Valid AuthRequestDto.SignUpDto signUpForm) {
         try {
             Member member = authService.signUp(scheduleId, signUpForm);
             JwtToken token = authService.login(scheduleId, signUpForm.getUsername(), signUpForm.getPassword());
@@ -42,7 +42,7 @@ public class AuthController {
     }
 
     @PostMapping("/schedule/{scheduleId}/login")
-    public ResponseEntity<AuthResponseDto.LoginDto> login(@PathVariable Long scheduleId, @RequestBody @Valid AuthRequestDto.LonginDto loginForm){
+    public ResponseEntity<AuthResponseDto.LoginDto> login(@PathVariable Long scheduleId, @RequestBody @Valid AuthRequestDto.LonginDto loginForm) {
         try {
             JwtToken token = authService.login(scheduleId, loginForm.getUsername(), loginForm.getPassword());
             return ResponseEntity.ok()
@@ -54,13 +54,14 @@ public class AuthController {
         }
     }
 
-    @PostMapping("/schedule/{scheduleId}/refresh")
-    public ResponseEntity<Map<String, String>> refreshAccessToken(HttpServletRequest request, @PathVariable Long scheduleId) {
+    @PostMapping("/refresh")
+    public ResponseEntity<Map<String, String>> refreshAccessToken(HttpServletRequest request) {
+        log.error("Token refresh");
         String refreshToken = null;
         String bearerToken = request.getHeader("Authorization");
         if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer")) {
             refreshToken = bearerToken.substring(7);
-            log.info(refreshToken);
+            log.info("토큰 갱신 요청 : " + refreshToken);
         }
 
         try {

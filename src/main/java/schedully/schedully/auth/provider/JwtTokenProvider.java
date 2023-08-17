@@ -26,7 +26,6 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Component
-
 public class JwtTokenProvider {
 
     private final Key secret;
@@ -55,11 +54,12 @@ public class JwtTokenProvider {
         String authorities = authentication.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.joining(","));
+        log.info("memberId: " + memberId + ", Auth: " + authorities);
 
         return Jwts.builder()
                 .setSubject(memberId)
-                .claim("auth",authorities)
-                .claim("scheduleId",scheduleId)
+                .claim("auth", authorities)
+                .claim("scheduleId", scheduleId)
                 .setExpiration(accessExpirationDate)
                 .signWith(secret, SignatureAlgorithm.HS256)
                 .compact();
@@ -67,18 +67,25 @@ public class JwtTokenProvider {
 
     @Transactional
     public String generateRefreshToken(String memberId) {
-        String refreshToken = Jwts.builder()
-                .setSubject(memberId)
-                .setExpiration(refreshExpirationDate)
-                .signWith(secret, SignatureAlgorithm.HS256)
-                .compact();
+        String refreshToken = null;
+        // 없으면 새로 발급
+        RefreshToken dbRefreshToken = refreshTokenRepository.findByMemberId(Long.parseLong(memberId));
+        if (dbRefreshToken == null) {
+            refreshToken = Jwts.builder()
+                    .setSubject(memberId)
+                    .setExpiration(refreshExpirationDate)
+                    .signWith(secret, SignatureAlgorithm.HS256)
+                    .compact();
 
-        RefreshToken refreshTokenEntity = RefreshToken.builder()
-                .memberId(Long.parseLong(memberId))
-                .refreshToken(refreshToken)
-                .build();
+            RefreshToken refreshTokenEntity = RefreshToken.builder()
+                    .memberId(Long.parseLong(memberId))
+                    .refreshToken(refreshToken)
+                    .build();
 
-        refreshTokenRepository.save(refreshTokenEntity);
+            refreshTokenRepository.save(refreshTokenEntity);
+        } else {
+            refreshToken = dbRefreshToken.getRefreshToken();
+        }
         return refreshToken;
     }
 
@@ -105,9 +112,9 @@ public class JwtTokenProvider {
             Jws<Claims> claims = Jwts.parserBuilder().setSigningKey(secret).build().parseClaimsJws(refreshToken);
             Long memberId = Long.parseLong(claims.getBody().getSubject());
             RefreshToken refreshTokenEntity = refreshTokenRepository.findByMemberId(memberId);
-            if(!refreshTokenEntity.getRefreshToken().equals(refreshToken)) throw new Exception("토큰정보가 DB와 일치하지 않습니다.");
+            if (!refreshTokenEntity.getRefreshToken().equals(refreshToken)) throw new Exception("토큰정보가 DB와 일치하지 않습니다.");
             return memberId;
-        }catch (io.jsonwebtoken.security.SecurityException | MalformedJwtException e) {
+        } catch (io.jsonwebtoken.security.SecurityException | MalformedJwtException e) {
             log.info("Invalid JWT Token", e);
         } catch (ExpiredJwtException e) {
             log.info("Expired JWT Token", e);
@@ -126,9 +133,9 @@ public class JwtTokenProvider {
 
         if (claims.get("auth") == null) {
             throw new RuntimeException("권한 정보가 없는 토큰입니다.");
-        }else if (claims.get("scheduleId") == null){
+        } else if (claims.get("scheduleId") == null) {
             throw new RuntimeException("스케쥴 ID 정보가 없는 토큰입니다.");
-        }else if (claims.getSubject() == null){
+        } else if (claims.getSubject() == null) {
             throw new RuntimeException("멤버 정보가 없는 토큰입니다.");
         }
 
