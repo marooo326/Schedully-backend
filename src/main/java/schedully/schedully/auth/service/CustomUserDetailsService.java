@@ -26,7 +26,7 @@ public class CustomUserDetailsService implements UserDetailsService {
 
         RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
         if (requestAttributes == null) {
-            throw new UsernameNotFoundException("");
+            throw new UsernameNotFoundException("scheduleId를 찾을 수 없습니다.");
         }
 
         Long scheduleId = (Long) requestAttributes.getAttribute("scheduleId", RequestAttributes.SCOPE_REQUEST);

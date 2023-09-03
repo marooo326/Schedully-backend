@@ -11,6 +11,8 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 import schedully.schedully.auth.domain.CustomUserDetails;
 import schedully.schedully.auth.provider.JwtTokenProvider;
+import schedully.schedully.exception.ErrorCode;
+import schedully.schedully.exception.auth.JwtAuthException;
 
 import java.io.IOException;
 
@@ -32,7 +34,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         log.info("수신한 JWT 토큰 : " + token);
 
         if (uri.startsWith("/refresh")) {
-            // /refresh 요청인 경우 인증 정보를 가져오지 않고 다음 필터로 요청을 전달
+            // "/refresh" 요청인 경우 인증 정보를 가져오지 않고 다음 필터로 요청을 전달
             filterChain.doFilter(request, response);
             return;
         }
@@ -40,7 +42,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         // null 이거나 유효하지 않은 토큰인지 검사
         if (token != null && jwtTokenProvider.validateAccessToken(token)) {
 
-            // 파라미터가 3개 이상이고 schedule 관련된 요청인 경우
+            // 파라미터가 3개 이상이고 schedule 관련된 요청인 경우 검증 진행
             if (uriParams.length >= 3 && uri.startsWith("/schedule")) {
 
                 String paramScheduleId = uriParams[2];
@@ -52,9 +54,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                 // 토큰의 schedule Id와 요청 URI 의 schedule Id 파라미터가 같은지 확인
                 if (!paramScheduleId.equals(tokenScheduleId.toString())) {
-                    log.error("잘못된 접근입니다. : " + request.getRequestURI());
-                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                    return;
+                    throw new JwtAuthException("토큰 정보와 요청 파라미터가 일치하지 않습니다.", ErrorCode.JWT_BAD_REQUEST);
                 }
             } else {
                 log.info("토큰 검증이 필요하지 않은 요청입니다. : " + request.getRequestURI());

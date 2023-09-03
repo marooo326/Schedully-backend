@@ -80,16 +80,10 @@ public class AuthService {
     }
 
     public JwtToken login(Long scheduleId, String username, String password) {
-        // 추후 적용
         RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
         if (requestAttributes != null) {
             requestAttributes.setAttribute("scheduleId", scheduleId, RequestAttributes.SCOPE_REQUEST);
         }
-
-//        // CustomUserDetailsService 로 scheduleId를 전달하기 위한 토큰
-//        UsernamePasswordAuthenticationToken scheduleIdToken = new UsernamePasswordAuthenticationToken(username, password);
-//        scheduleIdToken.setDetails(scheduleId);
-//        SecurityContextHolder.getContext().setAuthentication(scheduleIdToken);
 
         // loginForm 의 정보로 authenticationToken 인스턴스 및 authentication 인스턴스 생성 (-> CustomUserDetailService)
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(username, password);
@@ -117,7 +111,7 @@ public class AuthService {
                     Collections.singletonList(new SimpleGrantedAuthority(memberEntity.getRole().toString()))
             );
 
-            return jwtTokenProvider.generateAccessToken(authentication, memberEntity.getUsername(), scheduleId);
+            return jwtTokenProvider.generateAccessToken(authentication, memberEntity.getId().toString(), scheduleId);
         } else {
             log.info("DB에 해당 토큰 멤버 정보가 존재하지 않습니다.");
         }
