@@ -7,7 +7,7 @@ import java.time.LocalDate;
 
 public class ScheduleRequestDto {
     @Getter
-    public static class CreateDto {
+    public static class ScheduleDto {
         @NotBlank
         private String title;
 
@@ -21,5 +21,14 @@ public class ScheduleRequestDto {
 
         @NotBlank
         private LocalDate endDate;
+    }
+
+    @Getter
+    public static class DeleteDto {
+        @NotBlank
+        private Long id;
+
+        @NotBlank
+        private String password;
     }
 }

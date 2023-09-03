@@ -12,6 +12,8 @@ public class ScheduleResponseDto {
     @AllArgsConstructor(access = AccessLevel.PRIVATE)
     @NoArgsConstructor(access = AccessLevel.PROTECTED)
     public static class ScheduleDto {
+        private Long id;
+
         private String title;
 
         private String explanation;
@@ -27,6 +29,6 @@ public class ScheduleResponseDto {
     @AllArgsConstructor(access = AccessLevel.PRIVATE)
     @NoArgsConstructor(access = AccessLevel.PROTECTED)
     public static class MemberListDto {
-        List<MemberResponseDto.MemberDto> members;
+        private List<MemberResponseDto.MemberDto> members;
     }
 }

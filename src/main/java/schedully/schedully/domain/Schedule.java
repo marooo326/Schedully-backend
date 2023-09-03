@@ -2,7 +2,7 @@ package schedully.schedully.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
-import schedully.schedully.domain.Member;
+import schedully.schedully.controller.dto.ScheduleRequestDto;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -23,7 +23,7 @@ public class Schedule {
     private String title;
 
     @Column
-    private String content;
+    private String explanation;
 
     @Column
     private String password;
@@ -34,10 +34,18 @@ public class Schedule {
     @Column(nullable = false)
     private LocalDate endDate;
 
-    @OneToMany(mappedBy = "schedule")
+    @OneToMany(mappedBy = "schedule", cascade = CascadeType.REMOVE)
     private List<Member> members;
 
     public void addMember(Member member) {
         this.members.add(member);
+    }
+
+    public void updateInfo(ScheduleRequestDto.ScheduleDto info) {
+        this.title = info.getTitle();
+        this.explanation = info.getExplanation();
+        this.password = info.getPassword();
+        this.startDate = info.getStartDate();
+        this.endDate = info.getEndDate();
     }
 }
